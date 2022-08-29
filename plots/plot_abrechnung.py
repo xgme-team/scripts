@@ -4,6 +4,7 @@
 Plot the graph
 """
 from dataclasses import dataclass
+from hashlib import md5
 
 from plotly import graph_objects, colors
 
@@ -35,8 +36,11 @@ class Link:
     color: str
 
 
-def get_color(index):
+def get_color(string):
     """get a lighter version of the color by index"""
+    string_hash = md5()
+    string_hash.update(string.encode())
+    index = int(string_hash.hexdigest(), 16)
     color = COLORS[index % len(COLORS)]
     return color.replace("rgb", "rgba").replace(")", ",.5)")
 
@@ -64,7 +68,7 @@ def plot(year, input_values):
         nodes[node_type] = Node(
             id=i,
             label=f"{node_type} ({abs(node_amount):.2f} €)",
-            color=get_color(i),
+            color=get_color(node_type),
         )
 
     source = list(income.items())[0][0]
@@ -73,7 +77,7 @@ def plot(year, input_values):
         nodes["Budget"] = Node(
             id=len(nodes),
             label=f"Budget ({sum(income.values()):.2f} €)",
-            color=get_color(len(nodes)),
+            color=get_color("Budget"),
         )
         source = "Budget"
 
